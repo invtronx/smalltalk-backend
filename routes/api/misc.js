@@ -5,15 +5,20 @@ const User = require("../../models/user");
 
 router.get("/notifications", auth.required, (req, res, next) => {
   User.findById(req.authCurrentUser.id)
-    .populate("notifications")
+    .populate({
+      path: "notifications",
+      populate: "userAgent",
+    })
     .exec()
     .then((currentUser) => {
       if (!currentUser) {
-        return res.status(401);
+        return res.status(401).send();
       }
-      res.json(
-        currentUser.notifications.map((notification) => notification.toJSON())
-      );
+      res.json({
+        notifications: currentUser.notifications.map((notification) =>
+          notification.toJSON()
+        ),
+      });
     })
     .catch(next);
 });

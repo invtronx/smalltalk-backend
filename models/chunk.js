@@ -5,15 +5,17 @@ const Notification = require("./notification");
 
 const Schema = mongoose.Schema;
 
+const slugify = () => randomString({ length: 12, type: "url-safe" });
+
 const ChunkSchema = new Schema(
   {
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     content: { type: String, required: true, default: "Content" },
-    replyOn: { type: Schema.Types.ObjectId, ref: "Chunk" },
+    replyOn: { type: String },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     tags: [{ type: String, minlength: 3 }],
-    slug: { type: String, default: this.slugify },
+    slug: { type: String, default: slugify },
   },
   { timestamps: true }
 );
@@ -22,50 +24,35 @@ ChunkSchema.virtual("url").get(function () {
   return `/chunks/${this.slug}`;
 });
 
-ChunkSchema.methods.slugify = () =>
-  randomString({ length: 12, type: "url-safe" });
-
 ChunkSchema.methods.addComment = function (comment) {
   this.comments.push(comment._id);
-  const freshNotification = new Notification({
-    userAgent: comment.author,
-    action: "Comment",
-    redirectTo: this.url,
-    notify: this.author,
-  });
-  freshNotification.save();
   this.save();
 };
 
 ChunkSchema.methods.deleteComment = function (commentId) {
-  this.comments = this.comments.filter((id) => id !== commentId);
+  this.comments = this.comments.filter((id) => !id.equals(commentId));
   this.save();
 };
 
 ChunkSchema.methods.addLike = function (userId) {
   this.likes.push(userId);
-  const freshNotification = new Notification({
-    userAgent: userId,
-    action: "Like",
-    redirectTo: this.url,
-    notify: this.author,
-  });
-  freshNotification.save();
   this.save();
 };
 
 ChunkSchema.methods.deleteLike = function (userId) {
-  this.likes = this.likes.filter((id) => id !== userId);
+  this.likes = this.likes.filter((id) => !id.equals(userId));
   this.save();
 };
 
 ChunkSchema.methods.toJSONFor = function (user) {
   return {
+    _id: this._id,
     author: this.author.toShortJSON(),
     content: this.content,
-    replyOn: this.replyOn ? this.replyOn.toJSONFor(user) : null,
-    comments: this.comments.map((comment) => comment.toJSONFor(user)),
-    likes: this.likes.map((likedUser) => likedUser.toShortJSON()),
+    slug: this.slug,
+    replyOn: this.replyOn,
+    comments: this.comments,
+    likes: this.likes.length,
     tags: this.tags,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
@@ -75,9 +62,11 @@ ChunkSchema.methods.toJSONFor = function (user) {
 
 ChunkSchema.methods.toShortJSONFor = function (user) {
   return {
-    author: this.toShortJSON(),
+    _id: this._id,
+    author: this.author.toShortJSON(),
     content: this.content,
-    replyOn: this.replyOn ? this.replyOn.toShortJSONFor(user) : null,
+    slug: this.slug,
+    replyOn: this.replyOn,
     likes: this.likes.length,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

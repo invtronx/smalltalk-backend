@@ -80,6 +80,7 @@ UserSchema.methods.isFollower = function (userId) {
 
 UserSchema.methods.toAuthJSON = function () {
   return {
+    _id: this._id,
     username: this.username,
     bio: this.bio,
     gender: this.gender,
@@ -93,6 +94,7 @@ UserSchema.methods.toAuthJSON = function () {
 
 UserSchema.methods.toProfileJSONFor = function (user) {
   return {
+    _id: this._id,
     username: this.username,
     bio: this.bio,
     gender: this.gender,
@@ -106,6 +108,7 @@ UserSchema.methods.toProfileJSONFor = function (user) {
 
 UserSchema.methods.toShortJSON = function () {
   return {
+    _id: this._id,
     username: this.username,
     profilePic: this.profilePic,
     followers: this.followers.length,
@@ -128,26 +131,19 @@ UserSchema.methods.getChunksFor = function (user) {
 UserSchema.methods.follow = function (user) {
   this.following = this.following.concat(user._id);
   user.followers = user.followers.concat(this._id);
-  const freshNotification = new Notification({
-    userAgent: this._id,
-    action: "Follow",
-    redirectTo: this.url,
-    notify: user._id,
-  });
-  freshNotification.save();
   user.save();
   this.save();
 };
 
 UserSchema.methods.unfollow = function (user) {
   this.following = this.following.filter(
-    (followingUserId) => followingUserId !== user._id
+    (followingUserId) => !followingUserId.equals(user._id)
   );
-  user.followers = users.followers.filter(
-    (followerId) => followerId !== this._id
+  user.followers = user.followers.filter(
+    (followerId) => !followerId.equals(this._id)
   );
-  this.save();
   user.save();
+  this.save();
 };
 
 UserSchema.methods.addChunk = function (chunkId) {
@@ -156,7 +152,9 @@ UserSchema.methods.addChunk = function (chunkId) {
 };
 
 UserSchema.methods.deleteChunk = function (chunkId) {
-  this.chunks = this.chunks.filter((userChunkId) => userChunkId !== chunkId);
+  this.chunks = this.chunks.filter(
+    (userChunkId) => !userChunkId.equals(chunkId)
+  );
   this.save();
 };
 
@@ -166,6 +164,17 @@ UserSchema.methods.getFollowers = function () {
 
 UserSchema.methods.getFollowed = function () {
   return this.following.map((following) => following.toShortJSON());
+};
+
+UserSchema.methods.addNotification = function (agentId, action, redirectTo) {
+  const freshNotification = new Notification({
+    userAgent: agentId,
+    action: action,
+    redirectTo: redirectTo,
+  });
+  this.notifications = this.notifications.concat(freshNotification._id);
+  freshNotification.save();
+  this.save();
 };
 
 module.exports = mongoose.model("User", UserSchema);

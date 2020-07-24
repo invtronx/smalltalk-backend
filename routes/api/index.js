@@ -6,7 +6,7 @@ router.use("/", require("./misc"));
 
 // Raise a 422 error on validation error
 router.use((err, req, res, next) => {
-  if (err.name === "ValidationError") {
+  if (err.name == "ValidationError") {
     return res.status(422).json({
       errors: Object.keys(err.errors).reduce(function (errors, key) {
         errors[key] = err.errors[key].message;
@@ -20,9 +20,11 @@ router.use((err, req, res, next) => {
 
 // Raise a 404 error on failure to match route
 router.use((req, res, next) => {
-  const err = new Error("Path not found");
-  err.status = 404;
-  return next(err);
+  return res.status(404).json({
+    errors: {
+      path: "not found",
+    },
+  });
 });
 
 module.exports = router;

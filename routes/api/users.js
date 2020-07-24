@@ -6,17 +6,15 @@ const User = require("../../models/user");
 
 router.param("username", (req, res, next, username) => {
   User.findOne({ username })
-    .populate("followers")
-    .populate("following")
     .exec()
     .then((user) => {
       if (!user) {
         res.sendStatus(404);
       }
       req.user = user;
+      next();
     })
     .catch(next);
-  next();
 });
 
 router.get("/", auth.required, (req, res, next) => {
@@ -29,11 +27,11 @@ router.get("/", auth.required, (req, res, next) => {
     offset = 0,
   } = req.query;
 
-  Promise.all(
+  Promise.all([
     username ? User.findOne({ username }).exec() : null,
     followersOf ? User.findOne({ username: followersOf }).exec() : null,
-    followingOf ? User.findOne({ username: followingOf }).exec() : null
-  )
+    followingOf ? User.findOne({ username: followingOf }).exec() : null,
+  ])
     .then((results) => {
       const [queriedUser, followersOf, followingOf] = results;
       if (queriedUser) {
@@ -45,11 +43,11 @@ router.get("/", auth.required, (req, res, next) => {
       if (followingOf) {
         query._id = { $in: followingOf.following };
       }
-      Promise.all(
+      Promise.all([
         User.find(query).limit(Number(limit)).skip(Number(offset)).exec(),
-        User.count(query).exec(),
-        User.findById(req.authCurrentUser.id).exec()
-      ).then((queryResults) => {
+        User.countDocuments(query).exec(),
+        User.findById(req.authCurrentUser.id).exec(),
+      ]).then((queryResults) => {
         const [users, userCount, currentUser] = queryResults;
         return res.json({
           users: users.map((user) => user.toShortJSONFor(currentUser)),
@@ -68,22 +66,9 @@ router.post("/", auth.optional, (req, res, next) => {
   freshUser
     .save()
     .then((user) => {
-      return res.json(user.toAuthJSON());
-    })
-    .catch(next);
-});
-
-router.get("/:username", auth.required, (req, res, next) => {
-  User.findOne(req.authCurrentUser.id)
-    .exec()
-    .then((currentUser) => {
-      if (currentUser._id == req.user._id) {
-        res.redirect("/users/me");
-      }
-      if (!currentUser) {
-        return res.status(401);
-      }
-      return res.json(req.user.toProfileJSONFor(currentUser));
+      return res.json({
+        currentUser: user.toAuthJSON(),
+      });
     })
     .catch(next);
 });
@@ -93,9 +78,11 @@ router.get("/me", auth.required, (req, res, next) => {
     .exec()
     .then((currentUser) => {
       if (!currentUser) {
-        return res.status(401);
+        return res.status(401).send();
       }
-      return res.json(currentUser.toAuthJSON());
+      return res.json({
+        currentUser: currentUser.toAuthJSON(),
+      });
     })
     .catch(next);
 });
@@ -105,26 +92,32 @@ router.put("/me", auth.required, (req, res, next) => {
     .exec()
     .then((currentUser) => {
       if (!currentUser) {
-        return res.status(401);
+        return res.status(401).send();
       }
-      const { username, birthday, bio, profilePic, gender } = req.body;
-      User.findOne({ username })
-        .exec()
-        .then((existingUser) => {
-          if (existingUser !== null) {
-            throw new Error("Username is already taken");
-          }
-        });
-      currentUser = {
-        ...currentUser,
-        username,
-        birthday,
-        bio,
-        profilePic,
-        gender,
-      };
+      Object.keys(req.body).forEach((key) => {
+        currentUser[key] = req.body[key];
+      });
       currentUser.save().then((user) => {
-        return res.json(user.toAuthJSON());
+        return res.json({
+          currentUser: user.toAuthJSON(),
+        });
+      });
+    })
+    .catch(next);
+});
+
+router.get("/:username", auth.required, (req, res, next) => {
+  User.findById(req.authCurrentUser.id)
+    .exec()
+    .then((currentUser) => {
+      if (currentUser._id.equals(req.user._id)) {
+        res.redirect("/users/me");
+      }
+      if (!currentUser) {
+        return res.status(401).send();
+      }
+      return res.json({
+        user: req.user.toProfileJSONFor(currentUser),
       });
     })
     .catch(next);
@@ -135,10 +128,11 @@ router.post("/:username/follow", auth.required, (req, res, next) => {
     .exec()
     .then((currentUser) => {
       if (!currentUser) {
-        return res.status(401);
+        return res.status(401).send();
       }
       currentUser.follow(req.user);
-      return res.status(200);
+      req.user.addNotification(currentUser._id, "Follow", null);
+      return res.status(200).send();
     })
     .catch(next);
 });
@@ -148,10 +142,10 @@ router.delete("/:username/follow", auth.required, (req, res, next) => {
     .exec()
     .then((currentUser) => {
       if (!currentUser) {
-        return res.status(401);
+        return res.status(401).send();
       }
       currentUser.unfollow(req.user);
-      return res.status(200);
+      return res.status(200).send();
     })
     .catch(next);
 });
@@ -162,9 +156,11 @@ router.post("/login", auth.optional, (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.status(404).json(info);
+      return res.status(404).send().json(info);
     }
-    return res.json(user.toAuthJSON());
+    return res.json({
+      currentUser: user.toAuthJSON(),
+    });
   })(req, res, next);
 });
 

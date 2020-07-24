@@ -55,8 +55,7 @@ app.use(require("./routes"));
 
 // production-ready error handler: no stacktraces leaked to user
 app.use((err, req, res, next) => {
-  res.status(err.status || 500);
-  res.json({
+  res.status(err.status || 500).json({
     errors: {
       message: err.message,
     },
