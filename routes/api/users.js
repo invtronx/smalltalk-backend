@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const auth = require("../auth");
 const passport = require("passport");
+const queryString = require("querystring");
 
 const User = require("../../models/user");
 
@@ -20,22 +21,22 @@ router.param("username", (req, res, next, username) => {
 router.get("/", auth.required, (req, res, next) => {
   const query = {};
   const {
-    username,
+    name: encodedName,
     followersOf,
     followingOf,
     limit = 20,
     offset = 0,
   } = req.query;
+  const name = encodedName ? queryString.unescape(encodedName) : null;
 
   Promise.all([
-    username ? User.findOne({ username }).exec() : null,
     followersOf ? User.findOne({ username: followersOf }).exec() : null,
     followingOf ? User.findOne({ username: followingOf }).exec() : null,
   ])
     .then((results) => {
-      const [queriedUser, followersOf, followingOf] = results;
-      if (queriedUser) {
-        query.username = queriedUser.username;
+      const [followersOf, followingOf] = results;
+      if (name) {
+        query.name = { $regex: name, $options: "i" };
       }
       if (followersOf) {
         query._id = { $in: followersOf.followers };
@@ -60,8 +61,19 @@ router.get("/", auth.required, (req, res, next) => {
 
 router.post("/", auth.optional, (req, res, next) => {
   const freshUser = new User({
-    username: req.body.username,
+    name: req.body.name,
+    email: req.body.email,
+    birthday: req.body.birthday,
+    bio: req.body.bio,
+    gender: req.body.gender,
   });
+  User.findOne({ email })
+    .exec()
+    .then((user) => {
+      if (user) {
+        return res.status(404).send();
+      }
+    });
   freshUser.setPassword(req.body.password);
   freshUser
     .save()
@@ -111,7 +123,7 @@ router.get("/:username", auth.required, (req, res, next) => {
     .exec()
     .then((currentUser) => {
       if (currentUser._id.equals(req.user._id)) {
-        res.redirect("/users/me");
+        return res.redirect("/api/users/me");
       }
       if (!currentUser) {
         return res.status(401).send();
@@ -162,6 +174,19 @@ router.post("/login", auth.optional, (req, res, next) => {
       currentUser: user.toAuthJSON(),
     });
   })(req, res, next);
+});
+
+router.post("/check", auth.optional, (req, res, next) => {
+  User.findOne({ email: req.body.email })
+    .exec()
+    .then((user) => {
+      if (user) {
+        return res.status(404).send();
+      } else {
+        return res.status(200).send();
+      }
+    })
+    .catch(next);
 });
 
 module.exports = router;

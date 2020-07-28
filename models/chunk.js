@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const randomString = require("crypto-random-string");
 
-const Notification = require("./notification");
-
 const Schema = mongoose.Schema;
 
 const slugify = () => randomString({ length: 12, type: "url-safe" });

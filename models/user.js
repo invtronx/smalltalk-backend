@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const uniqueValidator = require("mongoose-unique-validator");
+const randomString = require("crypto-random-string");
+const slugify = require("slugify");
 
 const secret = require("../config").secret;
 const Notification = require("./notification");
@@ -9,6 +11,8 @@ const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
   {
+    name: { type: String, required: true, minlength: 3 },
+    email: { type: String, required: true },
     username: {
       type: String,
       unique: true,
@@ -33,6 +37,14 @@ const UserSchema = new Schema(
 );
 
 UserSchema.plugin(uniqueValidator);
+
+UserSchema.pre("save", function () {
+  const lastName = this.name.split(" ").slice(-1)[0];
+  this.username = `${slugify(lastName)}.${randomString({
+    length: 4,
+    type: "url-safe",
+  })}`;
+});
 
 UserSchema.virtual("url").get(function () {
   return `/users/${this.username}`;
@@ -81,6 +93,8 @@ UserSchema.methods.isFollower = function (userId) {
 UserSchema.methods.toAuthJSON = function () {
   return {
     _id: this._id,
+    name: this.name,
+    email: this.email,
     username: this.username,
     bio: this.bio,
     gender: this.gender,
@@ -95,6 +109,8 @@ UserSchema.methods.toAuthJSON = function () {
 UserSchema.methods.toProfileJSONFor = function (user) {
   return {
     _id: this._id,
+    name: this.name,
+    email: this.email,
     username: this.username,
     bio: this.bio,
     gender: this.gender,
@@ -109,6 +125,7 @@ UserSchema.methods.toProfileJSONFor = function (user) {
 UserSchema.methods.toShortJSON = function () {
   return {
     _id: this._id,
+    name: this.name,
     username: this.username,
     profilePic: this.profilePic,
     followers: this.followers.length,
