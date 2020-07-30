@@ -64,8 +64,10 @@ router.post("/", auth.optional, (req, res, next) => {
     .exec()
     .then((user) => {
       if (user) {
-        return res.status(404).json({
-          email: "Email is already in use",
+        return res.status(401).json({
+          errors: {
+            email: "Email is already in use",
+          },
         });
       } else {
         const freshUser = new User({

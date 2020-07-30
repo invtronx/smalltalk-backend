@@ -90,22 +90,6 @@ UserSchema.methods.isFollower = function (userId) {
   return this.followers.indexOf(userId) !== -1;
 };
 
-UserSchema.methods.toAuthJSON = function () {
-  return {
-    _id: this._id,
-    name: this.name,
-    email: this.email,
-    username: this.username,
-    bio: this.bio,
-    gender: this.gender,
-    birthday: this.birthday,
-    profilePic: this.profilePic,
-    followers: this.followers.length,
-    following: this.following.length,
-    token: this.generateJWT(),
-  };
-};
-
 UserSchema.methods.toShortJSON = function () {
   return {
     _id: this._id,
@@ -118,6 +102,14 @@ UserSchema.methods.toShortJSON = function () {
     profilePic: this.profilePic,
     followers: this.followers.length,
     following: this.following.length,
+    joinedOn: this.createdAt,
+  };
+};
+
+UserSchema.methods.toAuthJSON = function () {
+  return {
+    ...this.toShortJSON(),
+    token: this.generateJWT(),
   };
 };
 
