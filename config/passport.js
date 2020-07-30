@@ -16,14 +16,14 @@ passport.use(
           if (!user) {
             return done(null, false, {
               errors: {
-                email: "Not registered",
+                email: "Email is not registered",
               },
             });
           }
           if (!user.verifyPassword(password)) {
             return done(null, false, {
-              error: {
-                password: "Incorrect",
+              errors: {
+                password: "Password is incorrect",
               },
             });
           }

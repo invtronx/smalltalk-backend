@@ -60,27 +60,28 @@ router.get("/", auth.required, (req, res, next) => {
 });
 
 router.post("/", auth.optional, (req, res, next) => {
-  const freshUser = new User({
-    name: req.body.name,
-    email: req.body.email,
-    birthday: req.body.birthday,
-    bio: req.body.bio,
-    gender: req.body.gender,
-  });
-  User.findOne({ email })
+  User.findOne({ email: req.body.email })
     .exec()
     .then((user) => {
       if (user) {
-        return res.status(404).send();
+        return res.status(404).json({
+          email: "Email is already in use",
+        });
+      } else {
+        const freshUser = new User({
+          name: req.body.name,
+          email: req.body.email,
+          birthday: req.body.birthday,
+          bio: req.body.bio,
+          gender: req.body.gender,
+        });
+        freshUser.setPassword(req.body.password);
+        freshUser.save().then((user) => {
+          return res.json({
+            currentUser: user.toAuthJSON(),
+          });
+        });
       }
-    });
-  freshUser.setPassword(req.body.password);
-  freshUser
-    .save()
-    .then((user) => {
-      return res.json({
-        currentUser: user.toAuthJSON(),
-      });
     })
     .catch(next);
 });
@@ -168,25 +169,12 @@ router.post("/login", auth.optional, (req, res, next) => {
       return next(err);
     }
     if (!user) {
-      return res.status(404).send().json(info);
+      return res.status(404).json(info);
     }
     return res.json({
       currentUser: user.toAuthJSON(),
     });
   })(req, res, next);
-});
-
-router.post("/check", auth.optional, (req, res, next) => {
-  User.findOne({ email: req.body.email })
-    .exec()
-    .then((user) => {
-      if (user) {
-        return res.status(404).send();
-      } else {
-        return res.status(200).send();
-      }
-    })
-    .catch(next);
 });
 
 module.exports = router;
