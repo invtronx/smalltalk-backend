@@ -56,7 +56,7 @@ router.get("/", auth.required, (req, res, next) => {
           return res.status(401).send();
         }
         return res.json({
-          chunks: chunks.map((chunk) => chunk.toShortJSONFor(currentUser)),
+          chunks: chunks.map((chunk) => chunk.toJSONFor(currentUser)),
           chunkCount: chunkCount,
         });
       });

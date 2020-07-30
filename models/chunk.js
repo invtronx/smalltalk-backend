@@ -49,23 +49,9 @@ ChunkSchema.methods.toJSONFor = function (user) {
     content: this.content,
     slug: this.slug,
     replyOn: this.replyOn,
-    comments: this.comments,
+    comments: this.comments.length,
     likes: this.likes.length,
     tags: this.tags,
-    createdAt: this.createdAt,
-    updatedAt: this.updatedAt,
-    isLiked: this.likes.indexOf(user._id) !== -1 ? true : false,
-  };
-};
-
-ChunkSchema.methods.toShortJSONFor = function (user) {
-  return {
-    _id: this._id,
-    author: this.author.toShortJSON(),
-    content: this.content,
-    slug: this.slug,
-    replyOn: this.replyOn,
-    likes: this.likes.length,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     isLiked: this.likes.indexOf(user._id) !== -1 ? true : false,

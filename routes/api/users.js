@@ -51,7 +51,7 @@ router.get("/", auth.required, (req, res, next) => {
       ]).then((queryResults) => {
         const [users, userCount, currentUser] = queryResults;
         return res.json({
-          users: users.map((user) => user.toShortJSONFor(currentUser)),
+          users: users.map((user) => user.toProfileJSONFor(currentUser)),
           userCount: userCount,
         });
       });

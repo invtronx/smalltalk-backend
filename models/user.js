@@ -106,7 +106,7 @@ UserSchema.methods.toAuthJSON = function () {
   };
 };
 
-UserSchema.methods.toProfileJSONFor = function (user) {
+UserSchema.methods.toShortJSON = function () {
   return {
     _id: this._id,
     name: this.name,
@@ -118,21 +118,10 @@ UserSchema.methods.toProfileJSONFor = function (user) {
     profilePic: this.profilePic,
     followers: this.followers.length,
     following: this.following.length,
-    isFollowing: this.isFollower(user._id),
   };
 };
 
-UserSchema.methods.toShortJSON = function () {
-  return {
-    _id: this._id,
-    name: this.name,
-    username: this.username,
-    profilePic: this.profilePic,
-    followers: this.followers.length,
-  };
-};
-
-UserSchema.methods.toShortJSONFor = function (user) {
+UserSchema.methods.toProfileJSONFor = function (user) {
   return {
     ...this.toShortJSON(),
     isFollowing: this.isFollower(user._id),
