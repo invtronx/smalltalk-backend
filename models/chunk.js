@@ -9,7 +9,7 @@ const ChunkSchema = new Schema(
   {
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     content: { type: String, required: true, default: "Content" },
-    replyOn: { type: String },
+    sharedSource: { type: String },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     tags: [{ type: String, minlength: 3 }],
@@ -48,7 +48,7 @@ ChunkSchema.methods.toJSONFor = function (user) {
     author: this.author.toShortJSON(),
     content: this.content,
     slug: this.slug,
-    replyOn: this.replyOn,
+    sharedSource: this.sharedSource,
     commentCount: this.comments.length,
     likeCount: this.likes.length,
     tags: this.tags,

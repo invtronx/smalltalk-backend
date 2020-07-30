@@ -73,7 +73,7 @@ router.post("/", auth.required, (req, res, next) => {
       }
       const freshChunk = new Chunk({
         author: currentUser._id,
-        replyOn: req.body.replyOn || null,
+        sharedSource: req.body.sharedSource || null,
       });
       freshChunk.updateContent(req.body.content);
       freshChunk.save().then((chunk) => {
