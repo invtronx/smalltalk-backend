@@ -195,30 +195,6 @@ router.post("/:slug/comment", auth.required, (req, res, next) => {
     .catch(next);
 });
 
-router.put("/:slug/comment/:commentId", auth.required, (req, res, next) => {
-  User.findById(req.authCurrentUser.id)
-    .exec()
-    .then((currentUser) => {
-      if (!currentUser) {
-        return res.status(401).send();
-      }
-      Comment.findById(req.params.commentId)
-        .exec()
-        .then((comment) => {
-          if (!comment.author.equals(currentUser._id)) {
-            return res.status(401).send();
-          }
-          if (!comment) {
-            return res.status(404).send();
-          }
-          comment.content = req.body.content;
-          comment.save().catch(next);
-          res.status(200).send();
-        });
-    })
-    .catch(next);
-});
-
 router.delete("/:slug/comment/:commentId", auth.required, (req, res, next) => {
   User.findById(req.authCurrentUser.id)
     .exec()
