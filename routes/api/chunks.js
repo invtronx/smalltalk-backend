@@ -8,6 +8,7 @@ const Comment = require("../../models/comment");
 router.param("slug", (req, res, next, slug) => {
   Chunk.findOne({ slug })
     .populate("author")
+    .populate({ path: "sharedSource", populate: "author" })
     .then((chunk) => {
       if (!chunk) {
         return res.status(404).send();
@@ -44,6 +45,7 @@ router.get("/", auth.required, (req, res, next) => {
       Promise.all([
         Chunk.find(query)
           .populate("author")
+          .populate({ path: "sharedSource", populate: "author" })
           .limit(Number(limit))
           .skip(Number(offset))
           .sort({ createdAt: -1 })
@@ -79,6 +81,7 @@ router.post("/", auth.required, (req, res, next) => {
       freshChunk.save().then((chunk) => {
         chunk
           .populate("author")
+          .populate({ path: "sharedSource", populate: "author" })
           .execPopulate()
           .then((populatedChunk) => {
             res.json({

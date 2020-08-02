@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const randomString = require("crypto-random-string");
+const { json } = require("body-parser");
 
 const Schema = mongoose.Schema;
 
@@ -9,7 +10,7 @@ const ChunkSchema = new Schema(
   {
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     content: { type: String, required: true, default: "Content" },
-    sharedSource: { type: String },
+    sharedSource: { type: Schema.Types.ObjectId, ref: "Chunk" },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     tags: [{ type: String, minlength: 3 }],
@@ -48,7 +49,7 @@ ChunkSchema.methods.toJSONFor = function (user) {
     author: this.author.toShortJSON(),
     content: this.content,
     slug: this.slug,
-    sharedSource: this.sharedSource,
+    sharedSource: this.sharedSource ? this.sharedSource.toJSONFor(user) : null,
     commentCount: this.comments.length,
     likeCount: this.likes.length,
     tags: this.tags,
