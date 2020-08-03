@@ -17,6 +17,13 @@ const UserSchema = new Schema(
       type: String,
       unique: true,
       index: true,
+      default: function () {
+        const lastName = this.name.split(" ").slice(-1)[0];
+        return `${slugify(lastName)}.${randomString({
+          length: 4,
+          type: "url-safe",
+        })}`;
+      },
     },
     birthday: { type: Date },
     bio: { type: String },
@@ -37,14 +44,6 @@ const UserSchema = new Schema(
 );
 
 UserSchema.plugin(uniqueValidator);
-
-UserSchema.pre("save", function () {
-  const lastName = this.name.split(" ").slice(-1)[0];
-  this.username = `${slugify(lastName)}.${randomString({
-    length: 4,
-    type: "url-safe",
-  })}`;
-});
 
 UserSchema.virtual("url").get(function () {
   return `/users/${this.username}`;
@@ -129,7 +128,6 @@ UserSchema.methods.getChunksFor = function (user) {
 UserSchema.methods.follow = function (user) {
   this.following = this.following.concat(user._id);
   user.followers = user.followers.concat(this._id);
-  user.save();
   this.save();
 };
 
@@ -140,8 +138,8 @@ UserSchema.methods.unfollow = function (user) {
   user.followers = user.followers.filter(
     (followerId) => !followerId.equals(this._id)
   );
-  user.save();
   this.save();
+  user.save();
 };
 
 UserSchema.methods.addChunk = function (chunkId) {

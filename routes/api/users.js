@@ -10,7 +10,7 @@ router.param("username", (req, res, next, username) => {
     .exec()
     .then((user) => {
       if (!user) {
-        res.sendStatus(404);
+        return res.status(404).send();
       }
       req.user = user;
       next();
@@ -125,11 +125,11 @@ router.get("/:username", auth.required, (req, res, next) => {
   User.findById(req.authCurrentUser.id)
     .exec()
     .then((currentUser) => {
-      if (currentUser._id.equals(req.user._id)) {
-        return res.redirect("/api/users/me");
-      }
       if (!currentUser) {
         return res.status(401).send();
+      }
+      if (currentUser._id.equals(req.user._id)) {
+        return res.redirect("/api/users/me");
       }
       return res.json({
         user: req.user.toProfileJSONFor(currentUser),

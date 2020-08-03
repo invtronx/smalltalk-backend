@@ -254,7 +254,7 @@ router.post("/:slug/like", auth.required, (req, res, next) => {
       }
       req.chunk.addLike(currentUser._id);
       req.chunk.author.addNotification(currentUser._id, "Like", req.chunk.url);
-      res.status(200).send();
+      return res.status(200).send();
     })
     .catch(next);
 });
@@ -267,7 +267,7 @@ router.delete("/:slug/like", auth.required, (req, res, next) => {
         return res.status(401).send();
       }
       req.chunk.deleteLike(currentUser._id);
-      res.status(200).send();
+      return res.status(200).send();
     })
     .catch(next);
 });
