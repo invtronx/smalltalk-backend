@@ -2,15 +2,18 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const NotificationSchema = new Schema({
-  userAgent: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  action: {
-    type: String,
-    enum: ["Like", "Comment", "Follow"],
-    required: true,
+const NotificationSchema = new Schema(
+  {
+    userAgent: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    action: {
+      type: String,
+      enum: ["Like", "Comment", "Follow"],
+      required: true,
+    },
+    redirectTo: { type: String },
   },
-  redirectTo: { type: String },
-});
+  { timestamps: true }
+);
 
 NotificationSchema.methods.toJSON = function () {
   return {
@@ -18,6 +21,7 @@ NotificationSchema.methods.toJSON = function () {
     userAgent: this.userAgent.toShortJSON(),
     action: this.action,
     redirectTo: this.redirectTo,
+    time: this.createdAt,
   };
 };
 

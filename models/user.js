@@ -73,7 +73,7 @@ UserSchema.methods.verifyPassword = function (suppliedPassword) {
 
 UserSchema.methods.generateJWT = function () {
   const now = new Date();
-  const expireDate = now.setDate(now.getDate() + 30);
+  const expireDate = now.setDate(now.getDate() + 60);
 
   return jwt.sign(
     {
@@ -152,14 +152,6 @@ UserSchema.methods.deleteChunk = function (chunkId) {
     (userChunkId) => !userChunkId.equals(chunkId)
   );
   this.save();
-};
-
-UserSchema.methods.getFollowers = function () {
-  return this.followers.map((follower) => follower.toShortJSON());
-};
-
-UserSchema.methods.getFollowed = function () {
-  return this.following.map((following) => following.toShortJSON());
 };
 
 UserSchema.methods.addNotification = function (agentId, action, redirectTo) {

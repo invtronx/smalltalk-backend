@@ -166,7 +166,7 @@ router.get("/:slug/comment", auth.required, (req, res, next) => {
       ]).then((results) => {
         const [comments, commentCount] = results;
         return res.json({
-          comments: comments.map((comment) => comment.toJSON(currentUser)),
+          comments: comments.map((comment) => comment.toJSON()),
           commentCount: commentCount,
         });
       });
@@ -237,7 +237,7 @@ router.get("/:slug/like", auth.required, (req, res, next) => {
       ]).then((results) => {
         const [users, userCount] = results;
         return res.json({
-          users: users.map((user) => user.toShortJSON()),
+          users: users.map((user) => user.toProfileJSONFor(currentUser)),
           userCount: userCount,
         });
       });

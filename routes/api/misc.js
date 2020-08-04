@@ -18,6 +18,7 @@ router.get("/notifications", auth.required, (req, res, next) => {
         notifications: currentUser.notifications.map((notification) =>
           notification.toJSON()
         ),
+        notificationCount: currentUser.notifications.length,
       });
     })
     .catch(next);
