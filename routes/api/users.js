@@ -45,7 +45,11 @@ router.get("/", auth.required, (req, res, next) => {
         query._id = { $in: followingOf.following };
       }
       Promise.all([
-        User.find(query).limit(Number(limit)).skip(Number(offset)).exec(),
+        User.find(query)
+          .limit(Number(limit))
+          .skip(Number(offset))
+          .sort({ createdAt: -1 })
+          .exec(),
         User.countDocuments(query).exec(),
         User.findById(req.authCurrentUser.id).exec(),
       ]).then((queryResults) => {

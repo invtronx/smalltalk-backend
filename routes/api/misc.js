@@ -8,6 +8,7 @@ router.get("/notifications", auth.required, (req, res, next) => {
     .populate({
       path: "notifications",
       populate: "userAgent",
+      options: { sort: { createdAt: -1 } },
     })
     .exec()
     .then((currentUser) => {
