@@ -24,7 +24,7 @@ ChunkSchema.virtual("url").get(function () {
 });
 
 ChunkSchema.methods.addComment = function (comment) {
-  this.comments.push(comment._id);
+  this.comments.unshift(comment._id);
   this.save();
 };
 
@@ -34,7 +34,7 @@ ChunkSchema.methods.deleteComment = function (commentId) {
 };
 
 ChunkSchema.methods.addLike = function (userId) {
-  this.likes.push(userId);
+  this.likes.unshift(userId);
   this.save();
 };
 
