@@ -161,7 +161,7 @@ router.get("/:slug/comment", auth.required, (req, res, next) => {
         },
       };
       Promise.all([
-        Comment.find(query).populate("author").exec(),
+        Comment.find(query).populate("author").sort({ createdAt: -1 }).exec(),
         Comment.countDocuments(query).exec(),
       ]).then((results) => {
         const [comments, commentCount] = results;
