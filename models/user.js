@@ -31,11 +31,11 @@ const UserSchema = new Schema(
       type: String,
       default: function () {
         if (this.gender === "Male") {
-          return "https://cdn.imgbin.com/21/5/0/imgbin-computer-icons-avatar-social-media-blog-font-awesome-avatar-JdPkyt0m7ykS2bDNq99AHNXKV.jpg";
+          return "https://thumbs.dreamstime.com/b/profile-icon-male-avatar-portrait-casual-person-silhouette-face-flat-design-vector-46846325.jpg";
         } else if (this.gender === "Female") {
           return "https://p7.hiclipart.com/preview/318/451/633/female-computer-icons-woman-business-internal-communications-avatar.jpg";
         } else {
-          return "https://img.favpng.com/23/20/21/computer-icons-icon-design-person-download-png-favpng-NfUiqmSd4C12cJv3avzSf3enN.jpg";
+          return "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRIMJf32XCdIMPR005aLZbkk5TldBubjW2CfA&usqp=CAU";
         }
       },
     },
