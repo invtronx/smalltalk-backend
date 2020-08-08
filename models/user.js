@@ -27,7 +27,18 @@ const UserSchema = new Schema(
     },
     birthday: { type: Date },
     bio: { type: String },
-    profilePic: { type: String },
+    profilePic: {
+      type: String,
+      default: function () {
+        if (this.gender === "Male") {
+          return "https://cdn.imgbin.com/21/5/0/imgbin-computer-icons-avatar-social-media-blog-font-awesome-avatar-JdPkyt0m7ykS2bDNq99AHNXKV.jpg";
+        } else if (this.gender === "Female") {
+          return "https://p7.hiclipart.com/preview/318/451/633/female-computer-icons-woman-business-internal-communications-avatar.jpg";
+        } else {
+          return "https://img.favpng.com/23/20/21/computer-icons-icon-design-person-download-png-favpng-NfUiqmSd4C12cJv3avzSf3enN.jpg";
+        }
+      },
+    },
     chunks: [{ type: Schema.Types.ObjectId, ref: "Chunk" }],
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     following: [{ type: Schema.Types.ObjectId, ref: "User" }],
