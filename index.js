@@ -6,17 +6,21 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
+const compression = require("compression");
+const helmet = require("helmet");
 
 const port = process.env.PORT || 8000;
 
 const app = express();
 
 // register global middlewares
+app.use(helmet());
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(compression());
 
 // register passport-related middlewares
 app.use(
