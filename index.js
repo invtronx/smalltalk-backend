@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-// const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -16,7 +15,6 @@ const app = express();
 // register global middlewares
 app.use(helmet());
 app.use(cors());
-// app.use(morgan("dev"));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -33,9 +31,7 @@ require("./config/passport");
 
 // set up a mongodb connection
 const mongoConnectionString =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://adminronx:passronx@cluster0-tomy4.mongodb.net/smalltalk?retryWrites=true&w=majority" ||
-  "mongodb://localhost:27017/chunk";
+  process.env.MONGODB_URI || "mongodb://localhost:27017/chunk";
 mongoose.connect(mongoConnectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
