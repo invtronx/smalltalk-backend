@@ -33,7 +33,9 @@ require("./config/passport");
 
 // set up a mongodb connection
 const mongoConnectionString =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/chunk";
+  process.env.MONGODB_URI ||
+  "mongodb+srv://adminronx:passronx@cluster0-tomy4.mongodb.net/smalltalk?retryWrites=true&w=majority" ||
+  "mongodb://localhost:27017/chunk";
 mongoose.connect(mongoConnectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
